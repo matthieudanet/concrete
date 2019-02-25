@@ -1,5 +1,5 @@
-<html>  
-  <head>  
+<html>
+  <head>
     <meta charset="utf-8">
     <title>Concrete Mocha Tests</title>
     <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
@@ -17,8 +17,8 @@
         margin-left: 10px;
       }
     </style>
-  </head>  
-  <body>  
+  </head>
+  <body>
     <h1>Concrete Tests</h1>
     <div id="viewportContainer"></div>
     <div id="imageContainer"></div>
@@ -68,7 +68,6 @@
           var layer = new Concrete.Layer();
 
           assert.ok(layer.scene);
-          assert.ok(layer.hit);
         });
 
         test('add layer', function(){
@@ -133,13 +132,13 @@
           viewport.add(layer3);
 
           layer1.scene.context.fillStyle = 'red';
-          layer1.scene.context.fillRect(0, 0, 50, 50); 
+          layer1.scene.context.fillRect(0, 0, 50, 50);
 
           layer2.scene.context.fillStyle = 'yellow';
-          layer2.scene.context.fillRect(50, 0, 50, 50); 
+          layer2.scene.context.fillRect(50, 0, 50, 50);
 
           layer3.scene.context.fillStyle = 'blue';
-          layer3.scene.context.fillRect(100, 0, 50, 50); 
+          layer3.scene.context.fillRect(100, 0, 50, 50);
 
           viewport.render();
         });
@@ -184,13 +183,13 @@
           viewport.add(layer3);
 
           layer1.scene.context.fillStyle = 'red';
-          layer1.scene.context.fillRect(0, 0, 50, 50); 
+          layer1.scene.context.fillRect(0, 0, 50, 50);
 
           layer2.scene.context.fillStyle = 'yellow';
-          layer2.scene.context.fillRect(50, 0, 50, 50); 
+          layer2.scene.context.fillRect(50, 0, 50, 50);
 
           layer3.scene.context.fillStyle = 'blue';
-          layer3.scene.context.fillRect(100, 0, 50, 50); 
+          layer3.scene.context.fillRect(100, 0, 50, 50);
 
           viewport.render();
 
@@ -227,13 +226,13 @@
           viewport.add(layer3);
 
           layer1.scene.context.fillStyle = 'red';
-          layer1.scene.context.fillRect(0, 0, 50, 50); 
+          layer1.scene.context.fillRect(0, 0, 50, 50);
 
           layer2.scene.context.fillStyle = 'yellow';
-          layer2.scene.context.fillRect(50, 0, 50, 50); 
+          layer2.scene.context.fillRect(50, 0, 50, 50);
 
           layer3.scene.context.fillStyle = 'blue';
-          layer3.scene.context.fillRect(100, 0, 50, 50); 
+          layer3.scene.context.fillRect(100, 0, 50, 50);
 
           viewport.render();
 
@@ -249,44 +248,6 @@
           assert.equal(viewport.layers[1].id, 'layer1');
           assert.equal(viewport.layers[2].id, 'layer2');
 
-        });
-
-        test('hit detection', function(){
-          var viewport = new Concrete.Viewport({
-            width: 500,
-            height: 200,
-            container: viewportContainer
-          });
-
-          window.viewport = viewport;
-
-          var layer = new Concrete.Layer();
-
-          viewport.add(layer);
-
-          layer.scene.context.fillStyle = 'red';
-          layer.scene.context.fillRect(0, 0, 50, 50);
-
-          viewport.render();
-
-          layer.hit.context.fillStyle = layer.hit.getColorFromIndex(12345);
-          layer.hit.context.fillRect(0, 0, 50, 50);
-
-          // in red rectangle
-          assert.equal(layer.hit.getIntersection(0, 0), 12345);
-          assert.equal(layer.hit.getIntersection(5, 5), 12345);
-          assert.equal(layer.hit.getIntersection(49, 49), 12345);
-
-          // out of red rectangle
-          assert.equal(layer.hit.getIntersection(100, 100), -1);
-
-          // in red rectangle
-          assert.equal(viewport.getIntersection(0, 0), 12345);
-          assert.equal(viewport.getIntersection(5, 5), 12345);
-          assert.equal(viewport.getIntersection(49, 49), 12345);
-
-          // out of red rectangle
-          assert.equal(viewport.getIntersection(100, 100), -1);
         });
 
         test('layer moveUp()', function(){
@@ -309,13 +270,13 @@
           viewport.add(layer3);
 
           layer1.scene.context.fillStyle = 'red';
-          layer1.scene.context.fillRect(0, 0, 50, 50); 
+          layer1.scene.context.fillRect(0, 0, 50, 50);
 
           layer2.scene.context.fillStyle = 'yellow';
-          layer2.scene.context.fillRect(50, 0, 50, 50); 
+          layer2.scene.context.fillRect(50, 0, 50, 50);
 
           layer3.scene.context.fillStyle = 'blue';
-          layer3.scene.context.fillRect(100, 0, 50, 50); 
+          layer3.scene.context.fillRect(100, 0, 50, 50);
 
           viewport.render();
 
@@ -353,13 +314,13 @@
           viewport.add(layer3);
 
           layer1.scene.context.fillStyle = 'red';
-          layer1.scene.context.fillRect(0, 0, 50, 50); 
+          layer1.scene.context.fillRect(0, 0, 50, 50);
 
           layer2.scene.context.fillStyle = 'yellow';
-          layer2.scene.context.fillRect(50, 0, 50, 50); 
+          layer2.scene.context.fillRect(50, 0, 50, 50);
 
           layer3.scene.context.fillStyle = 'blue';
-          layer3.scene.context.fillRect(100, 0, 50, 50); 
+          layer3.scene.context.fillRect(100, 0, 50, 50);
 
           viewport.render();
 
@@ -454,5 +415,5 @@
 
         mocha.run();
     </script>
-  </body>  
-</html> 
+  </body>
+</html>

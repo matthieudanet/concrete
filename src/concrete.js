@@ -28,12 +28,12 @@ Concrete.Viewport = function(config) {
   }
 
   this.container = config.container;
-  this.layers = []; 
+  this.layers = [];
   this.id = idCounter++;
   this.scene = new Concrete.Scene();
 
   this.setSize(config.width || 0, config.height || 0);
-  
+
 
   // clear container
   config.container.innerHTML = '';
@@ -67,27 +67,6 @@ Concrete.Viewport.prototype = {
     return this;
   },
   /**
-   * get key associated to coordinate.  This can be used for mouse interactivity.
-   * @param {Number} x
-   * @param {Number} y
-   * @returns {Integer} integer - returns -1 if no pixel is there
-   */
-  getIntersection: function(x, y) {
-    var layers = this.layers,
-        len = layers.length,
-        n, layer, key;
-
-    for (n=len-1; n>=0; n--) {
-      layer = layers[n];
-      key = layer.hit.getIntersection(x, y);
-      if (key >= 0) {
-        return key;
-      }
-    }
-
-    return -1;
-  },
-  /** 
    * get viewport index from all Concrete viewports
    * @returns {Integer}
    */
@@ -117,7 +96,7 @@ Concrete.Viewport.prototype = {
 
     // clear dom
     this.container.innerHTML = '';
-    
+
     // remove self from viewports array
     Concrete.viewports.splice(this.getIndex(), 1);
   },
@@ -157,9 +136,6 @@ Concrete.Layer = function(config) {
   this.height = 0;
   this.visible = true;
   this.id = idCounter++;
-  this.hit = new Concrete.Hit({
-    contextType: config.contextType
-  });
   this.scene = new Concrete.Scene({
     contextType: config.contextType
   });
@@ -194,10 +170,9 @@ Concrete.Layer.prototype = {
     this.width = width;
     this.height = height;
     this.scene.setSize(width, height);
-    this.hit.setSize(width, height);
     return this;
   },
-  /** 
+  /**
    * move up
    * @returns {Concrete.Layer}
    */
@@ -214,7 +189,7 @@ Concrete.Layer.prototype = {
 
     return this;
   },
-  /** 
+  /**
    * move down
    * @returns {Concrete.Layer}
    */
@@ -231,7 +206,7 @@ Concrete.Layer.prototype = {
 
     return this;
   },
-  /** 
+  /**
    * move to top
    * @returns {Concrete.Layer}
    */
@@ -243,7 +218,7 @@ Concrete.Layer.prototype = {
     layers.splice(index, 1);
     layers.push(this);
   },
-  /** 
+  /**
    * move to bottom
    * @returns {Concrete.Layer}
    */
@@ -257,7 +232,7 @@ Concrete.Layer.prototype = {
 
     return this;
   },
-  /** 
+  /**
    * get layer index from viewport layers
    * @returns {Number|null}
    */
@@ -328,7 +303,7 @@ Concrete.Scene.prototype = {
     this.canvas.width = width * Concrete.PIXEL_RATIO;
     this.canvas.style.width = width + 'px';
     this.canvas.height = height * Concrete.PIXEL_RATIO;
-    this.canvas.style.height = height + 'px'; 
+    this.canvas.style.height = height + 'px';
 
     if (this.contextType === '2d' && Concrete.PIXEL_RATIO !== 1) {
       this.context.scale(Concrete.PIXEL_RATIO, Concrete.PIXEL_RATIO);
@@ -336,7 +311,7 @@ Concrete.Scene.prototype = {
 
     return this;
   },
-  /** 
+  /**
    * clear scene
    * @returns {Concrete.Scene}
    */
@@ -351,7 +326,7 @@ Concrete.Scene.prototype = {
     }
     return this;
   },
-  /** 
+  /**
    * convert scene into an image
    * @param {Function} callback
    */
@@ -367,7 +342,7 @@ Concrete.Scene.prototype = {
     };
     imageObj.src = dataURL;
   },
-  /** 
+  /**
    * download scene as an image
    * @param {Object} config
    * @param {String} config.fileName
@@ -396,137 +371,6 @@ Concrete.Scene.prototype = {
     });
   }
 };
-
-////////////////////////////////////////////////////////////// HIT //////////////////////////////////////////////////////////////
-
-/**
- * Concrete Hit constructor
- * @param {Object} config
- * @param {Integer} [config.width] - canvas width in pixels
- * @param {Integer} [config.height] - canvas height in pixels
- */
-Concrete.Hit = function(config) {
-  if (!config) {
-    config = {};
-  }
-
-  this.width = 0;
-  this.height = 0;
-  this.contextType = config.contextType || '2d';
-  this.canvas = document.createElement('canvas');
-  this.canvas.className = 'concrete-hit-canvas';
-  this.canvas.style.display = 'none';
-  this.canvas.style.position = 'relative';
-  this.context = this.canvas.getContext(this.contextType, {
-    // have to add preserveDrawingBuffer so that we can pick colors with readPixels for hit detection
-    preserveDrawingBuffer: true,
-    // solve webgl antialiasing picking issue
-    antialias: false
-  });
-
-  // this.hitColorIndex = 0;
-  // this.keyToColor = {};
-  // this.colorToKey = {};
-
-  if (config.width && config.height) {
-    this.setSize(config.width, config.height);
-  }
-};
-
-Concrete.Hit.prototype = {
-  /**
-   * set hit size
-   * @param {Number} width
-   * @param {Number} height
-   * @returns {Concrete.Hit}
-   */
-  setSize: function(width, height) {
-    this.width = width;
-    this.height = height;
-    this.canvas.width = width * Concrete.PIXEL_RATIO;
-    this.canvas.style.width = width + 'px';
-    this.canvas.height = height * Concrete.PIXEL_RATIO;
-    this.canvas.style.height = height + 'px';
-    return this;
-  },
-  /** 
-   * clear hit
-   * @returns {Concrete.Hit}
-   */
-  clear: function() {
-    var context = this.context;
-    if (this.contextType === '2d') {
-      context.clearRect(0, 0, this.width * Concrete.PIXEL_RATIO, this.height * Concrete.PIXEL_RATIO);
-    }
-    // webgl or webgl2
-    else {
-      context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
-    }
-    return this;
-  },
-  /**
-   * get key associated to coordinate.  This can be used for mouse interactivity.
-   * @param {Number} x
-   * @param {Number} y
-   * @returns {Integer} integer - returns -1 if no pixel is there
-   */
-  getIntersection: function(x, y) {
-    var context = this.context,
-        data;
-
-    // 2d
-    if (this.contextType === '2d') {
-      data = context.getImageData(Math.round(x), Math.round(y), 1, 1).data;
-
-      if (data[3] === 0) {
-        return -1;
-      }      
-    }
-    // webgl
-    else {
-      data = new Uint8Array(4);
-      context.readPixels(Math.round(x*Concrete.PIXEL_RATIO), Math.round((this.height - y)*Concrete.PIXEL_RATIO), 1, 1, context.RGBA, context.UNSIGNED_BYTE, data);
-
-      if (data[0] === 255 && data[1] === 255 && data[2] === 255) {
-        return -1;
-      }
-    }
-
-    return this.rgbToInt(data);
-  },
-  /**
-   * get canvas formatted color string from data index
-   * @param {Number} index
-   * @returns {String}
-   */
-  getColorFromIndex: function(index) {
-    var rgb = this.intToRGB(index);
-    return 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')';
-  },
-  /** 
-   * converts rgb array to integer value
-   * @param {Array.<Number} rgb - [r,g,b]
-   * @returns {Integer}
-   */
-  rgbToInt: function(rgb) {
-    var r = rgb[0];
-    var g = rgb[1];
-    var b = rgb[2];
-    return (r << 16) + (g << 8) + b;
-  },
-  /** 
-   * converts integer value to rgb array
-   * @param {Number} number - positive number between 0 and 256*256*256 = 16,777,216
-   * @returns {Array.<Integer>}
-   */
-  intToRGB: function(number) {
-    var r = (number & 0xff0000) >> 16;
-    var g = (number & 0x00ff00) >> 8;
-    var b = (number & 0x0000ff);
-    return [r, g, b];
-  },
-};
-
 
 // export
 (function (global) {

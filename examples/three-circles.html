@@ -27,12 +27,6 @@
         viewport.render();
       }
 
-      function drawHitCircles() {
-        circles.forEach(function(circle) {
-          drawHitCircle(circle);
-        });
-      }
-
       function drawSceneCircle(config) {
         var scene = config.layer.scene,
             context = scene.context;
@@ -55,19 +49,6 @@
           context.lineWidth = 2;
           context.stroke();
         }
-        context.restore();
-      }
-
-      function drawHitCircle(config) {
-        var hit = config.layer.hit,
-            context = hit.context;
-
-        hit.clear();
-        context.save();
-        context.beginPath();
-        context.arc(config.x, config.y, 60, 0, Math.PI*2, false);
-        context.fillStyle = hit.getColorFromIndex(config.key);
-        context.fill();
         context.restore();
       }
 
@@ -96,7 +77,7 @@
           }
         }
 
-        return null;  
+        return null;
       }
 
       function destroyCircle(key) {
@@ -108,7 +89,6 @@
           if (circle.key === key) {
             circles.splice(n, 1);
             drawSceneCircles();
-            drawHitCircles();
             return true;
           }
         }
@@ -165,52 +145,8 @@
         }
       ];
 
-      // draw circles onto hit canvases for mouse detection
-      drawHitCircles();
-
       // draw visible circles
       drawSceneCircles();
-
-      // add concrete container handlers
-      concreteContainer.addEventListener('mousemove', function(evt) {
-        var boundingRect = concreteContainer.getBoundingClientRect(),
-            x = evt.clientX - boundingRect.left,
-            y = evt.clientY - boundingRect.top,
-            key = viewport.getIntersection(x, y),
-            circle;
-
-        // unhover all circles
-        circles.forEach(function(circle) {
-          circle.hovered = false;
-        });
-        
-        if (key >= 0) {
-          circle = getCircleFromKey(key);
-          circle.hovered = true;
-        }
-
-        drawSceneCircles();
-      });
-
-      concreteContainer.addEventListener('click', function(evt) {
-        var boundingRect = concreteContainer.getBoundingClientRect(),
-            x = evt.clientX - boundingRect.left,
-            y = evt.clientY - boundingRect.top,
-            key = viewport.getIntersection(x, y),
-            circle;
-
-        // unhover all circles
-        circles.forEach(function(circle) {
-          circle.selected = false;
-        });
-        
-        if (key >= 0) {
-          circle = getCircleFromKey(key);
-          circle.selected = true;
-        }
-
-        drawSceneCircles();
-      });
 
       // add button handlers
       document.getElementById('moveUp').addEventListener('click', function() {
