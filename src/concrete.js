@@ -5,8 +5,6 @@ Concrete.PIXEL_RATIO = (function () {
     return (window && window.devicePixelRatio) || 1;
 })();
 
-Concrete.viewports = [];
-
 ////////////////////////////////////////////////////////////// VIEWPORT //////////////////////////////////////////////////////////////
 
 /**
@@ -30,8 +28,6 @@ Concrete.Viewport = function (config) {
     // clear container
     config.container.innerHTML = '';
     config.container.appendChild(this.scene.canvas);
-
-    Concrete.viewports.push(this);
 };
 
 Concrete.Viewport.prototype = {
@@ -52,39 +48,19 @@ Concrete.Viewport.prototype = {
      * set viewport size
      * @param {Integer} width - viewport width in pixels
      * @param {Integer} height - viewport height in pixels
-     * @param {Boolean} propagation - True if the new size should be applied to all layers
+     * @param {Boolean} cascade - True if the new size should be applied to all layers
      * @returns {Concrete.Viewport}
      */
-    setSize: function (width, height, propagation) {
+    setSize: function (width, height, cascade) {
         this.width = width;
         this.height = height;
         this.scene.setSize(width, height);
-        if (propagation) {
+        if (cascade) {
             this.layers.forEach(function (layer) {
                 layer.setSize(width, height);
             });
         }
         return this;
-    },
-
-    /**
-     * get viewport index from all Concrete viewports
-     * @returns {Integer}
-     */
-    getIndex: function () {
-        var viewports = Concrete.viewports,
-            len = viewports.length,
-            n = 0,
-            viewport;
-
-        for (n = 0; n < len; n++) {
-            viewport = viewports[n];
-            if (this.id === viewport.id) {
-                return n;
-            }
-        }
-
-        return null;
     },
 
     /**
@@ -98,9 +74,6 @@ Concrete.Viewport.prototype = {
 
         // clear dom
         this.container.innerHTML = '';
-
-        // remove self from viewports array
-        Concrete.viewports.splice(this.getIndex(), 1);
     },
 
     /**
@@ -113,7 +86,7 @@ Concrete.Viewport.prototype = {
 
         this.layers.forEach(function (layer) {
             if (layer.visible) {
-                scene.context.drawImage(layer.scene.canvas, 0, 0, layer.width, layer.height);
+                scene.context.drawImage(layer.scene.canvas, layer.x, layer.y, layer.width, layer.height);
             }
         });
     }
@@ -133,11 +106,13 @@ Concrete.Layer = function (config) {
     if (!config) {
         config = {};
     }
+
     this.x = 0;
     this.y = 0;
     this.width = 0;
     this.height = 0;
     this.visible = true;
+
     this.id = idCounter++;
     this.scene = new Concrete.OffScreenScene({
         contextType: config.contextType
@@ -146,6 +121,7 @@ Concrete.Layer = function (config) {
     if (config.x && config.y) {
         this.setPosition(config.x, config.y);
     }
+
     if (config.width && config.height) {
         this.setSize(config.width, config.height);
     }
@@ -162,6 +138,7 @@ Concrete.Layer.prototype = {
     setPosition: function (x, y) {
         this.x = x;
         this.y = y;
+
         return this;
     },
 
@@ -175,6 +152,7 @@ Concrete.Layer.prototype = {
         this.width = width;
         this.height = height;
         this.scene.setSize(width, height);
+
         return this;
     },
 
@@ -225,6 +203,8 @@ Concrete.Layer.prototype = {
 
         layers.splice(index, 1);
         layers.push(this);
+
+        return this;
     },
 
     /**
@@ -293,10 +273,6 @@ Concrete.Scene = function (config) {
     this.canvas.className = 'concrete-scene-canvas';
     this.canvas.style.display = 'inline-block';
     this.context = this.canvas.getContext(this.contextType);
-
-    if (config.width && config.height) {
-        this.setSize(config.width, config.height);
-    }
 };
 
 Concrete.Scene.prototype = {
@@ -330,13 +306,13 @@ Concrete.Scene.prototype = {
      */
     clear: function () {
         var context = this.context;
+
         if (this.contextType === '2d') {
             context.clearRect(0, 0, this.width * Concrete.PIXEL_RATIO, this.height * Concrete.PIXEL_RATIO);
-        }
-        // webgl or webgl2
-        else {
+        } else {
             context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
         }
+
         return this;
     },
 
@@ -399,10 +375,11 @@ Concrete.OffScreenScene = function (config) {
     if (!config) {
         config = {};
     }
+
     this.contextType = config.contextType || '2d';
 
     this.id = idCounter++;
-    this.canvas = window.OffscreenCanvas ? new OffscreenCanvas(0, 0) : document.createElement('canvas')
+    this.canvas = window.OffscreenCanvas ? new OffscreenCanvas(0, 0) : document.createElement('canvas');
     this.context = this.canvas.getContext(this.contextType);
 };
 
@@ -436,11 +413,10 @@ Concrete.OffScreenScene.prototype = {
         var context = this.context;
         if (this.contextType === '2d') {
             context.clearRect(0, 0, this.width * Concrete.PIXEL_RATIO, this.height * Concrete.PIXEL_RATIO);
-        }
-        // webgl or webgl2
-        else {
+        } else {
             context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
         }
+
         return this;
     }
 };
@@ -452,7 +428,7 @@ Concrete.OffScreenScene.prototype = {
     // AMD support
     if (typeof define === 'function' && define.amd) {
         define(function () { return Concrete; });
-        // CommonJS and Node.js module support.
+    // CommonJS and Node.js module support.
     } else if (typeof exports !== 'undefined') {
         // Support Node.js specific `module.exports` (which can be a function)
         if (typeof module !== 'undefined' && module.exports) {
