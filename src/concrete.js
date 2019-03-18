@@ -27,7 +27,6 @@ Concrete.Viewport = function (config) {
 
     this.setSize(config.width || 0, config.height || 0);
 
-
     // clear container
     config.container.innerHTML = '';
     config.container.appendChild(this.scene.canvas);
@@ -36,6 +35,7 @@ Concrete.Viewport = function (config) {
 };
 
 Concrete.Viewport.prototype = {
+
     /**
      * add layer
      * @param {Concrete.Layer} layer
@@ -47,6 +47,7 @@ Concrete.Viewport.prototype = {
         layer.viewport = this;
         return this;
     },
+
     /**
      * set viewport size
      * @param {Integer} width - viewport width in pixels
@@ -65,6 +66,7 @@ Concrete.Viewport.prototype = {
         }
         return this;
     },
+
     /**
      * get viewport index from all Concrete viewports
      * @returns {Integer}
@@ -84,6 +86,7 @@ Concrete.Viewport.prototype = {
 
         return null;
     },
+
     /**
      * destroy viewport
      */
@@ -99,6 +102,7 @@ Concrete.Viewport.prototype = {
         // remove self from viewports array
         Concrete.viewports.splice(this.getIndex(), 1);
     },
+
     /**
      * composite all layers onto visible canvas
      */
@@ -135,7 +139,7 @@ Concrete.Layer = function (config) {
     this.height = 0;
     this.visible = true;
     this.id = idCounter++;
-    this.scene = new Concrete.Scene({
+    this.scene = new Concrete.OffScreenScene({
         contextType: config.contextType
     });
 
@@ -148,6 +152,7 @@ Concrete.Layer = function (config) {
 };
 
 Concrete.Layer.prototype = {
+
     /**
      * set layer position
      * @param {Number} x
@@ -159,6 +164,7 @@ Concrete.Layer.prototype = {
         this.y = y;
         return this;
     },
+
     /**
      * set layer size
      * @param {Number} width
@@ -171,6 +177,7 @@ Concrete.Layer.prototype = {
         this.scene.setSize(width, height);
         return this;
     },
+
     /**
      * move up
      * @returns {Concrete.Layer}
@@ -188,6 +195,7 @@ Concrete.Layer.prototype = {
 
         return this;
     },
+
     /**
      * move down
      * @returns {Concrete.Layer}
@@ -205,6 +213,7 @@ Concrete.Layer.prototype = {
 
         return this;
     },
+
     /**
      * move to top
      * @returns {Concrete.Layer}
@@ -217,6 +226,7 @@ Concrete.Layer.prototype = {
         layers.splice(index, 1);
         layers.push(this);
     },
+
     /**
      * move to bottom
      * @returns {Concrete.Layer}
@@ -231,6 +241,7 @@ Concrete.Layer.prototype = {
 
         return this;
     },
+
     /**
      * get layer index from viewport layers
      * @returns {Number|null}
@@ -250,6 +261,7 @@ Concrete.Layer.prototype = {
 
         return null;
     },
+
     /**
      * destroy
      */
@@ -288,6 +300,7 @@ Concrete.Scene = function (config) {
 };
 
 Concrete.Scene.prototype = {
+
     /**
      * set scene size
      * @param {Number} width
@@ -310,6 +323,7 @@ Concrete.Scene.prototype = {
 
         return this;
     },
+
     /**
      * clear scene
      * @returns {Concrete.Scene}
@@ -325,6 +339,7 @@ Concrete.Scene.prototype = {
         }
         return this;
     },
+
     /**
      * convert scene into an image
      * @param {Function} callback
@@ -341,6 +356,7 @@ Concrete.Scene.prototype = {
         };
         imageObj.src = dataURL;
     },
+
     /**
      * download scene as an image
      * @param {Object} config
@@ -368,6 +384,64 @@ Concrete.Scene.prototype = {
                 anchor.click();
             }
         });
+    }
+};
+
+/////////////////////////////////////////////////////////// OFFSCREENSCENE ///////////////////////////////////////////////////////////
+
+/**
+ * Concrete Scene constructor
+ * @param {Object} config
+ * @param {Integer} [config.width] - canvas width in pixels
+ * @param {Integer} [config.height] - canvas height in pixels
+ */
+Concrete.OffScreenScene = function (config) {
+    if (!config) {
+        config = {};
+    }
+    this.contextType = config.contextType || '2d';
+
+    this.id = idCounter++;
+    this.canvas = window.OffscreenCanvas ? new OffscreenCanvas(0, 0) : document.createElement('canvas')
+    this.context = this.canvas.getContext(this.contextType);
+};
+
+Concrete.OffScreenScene.prototype = {
+
+    /**
+     * set scene size
+     * @param {Number} width
+     * @param {Number} height
+     * @returns {Concrete.Scene}
+     */
+    setSize: function (width, height) {
+        this.width = width;
+        this.height = height;
+
+        this.canvas.width = width * Concrete.PIXEL_RATIO;
+        this.canvas.height = height * Concrete.PIXEL_RATIO;
+
+        if (this.contextType === '2d' && Concrete.PIXEL_RATIO !== 1) {
+            this.context.scale(Concrete.PIXEL_RATIO, Concrete.PIXEL_RATIO);
+        }
+
+        return this;
+    },
+
+    /**
+     * clear scene
+     * @returns {Concrete.Scene}
+     */
+    clear: function () {
+        var context = this.context;
+        if (this.contextType === '2d') {
+            context.clearRect(0, 0, this.width * Concrete.PIXEL_RATIO, this.height * Concrete.PIXEL_RATIO);
+        }
+        // webgl or webgl2
+        else {
+            context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+        }
+        return this;
     }
 };
 
